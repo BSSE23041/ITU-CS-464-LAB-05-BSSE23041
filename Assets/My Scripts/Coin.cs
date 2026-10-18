@@ -1,12 +1,11 @@
+
 using UnityEngine;
 
 public enum CoinType { Normal, Red, Blue }
 
-// Parts 2 + 3 of the lecture: a trigger that checks who touched it, reports to the
-// GameManager and removes itself. One script is used for gold, red AND blue coins.
 public class Coin : MonoBehaviour
 {
-    [SerializeField] int value = 1;            // only used by Normal (gold) coins
+    [SerializeField] int value = 1;
     [SerializeField] float spinSpeed = 90f;
 
     public CoinType Type { get; private set; } = CoinType.Normal;
@@ -14,7 +13,7 @@ public class Coin : MonoBehaviour
 
     void Awake()
     {
-        // --- safety net: make sure the coin can actually be picked up -------------
+        // check coin collider
         Collider[] cols = GetComponentsInChildren<Collider>();
         if (cols.Length == 0)
         {
@@ -33,12 +32,10 @@ public class Coin : MonoBehaviour
         }
         foreach (Collider c in cols)
         {
-            if (c is MeshCollider mc) mc.convex = true;   // concave mesh colliders can't be triggers
+            if (c is MeshCollider mc) mc.convex = true;
             c.isTrigger = true;
         }
 
-        // A kinematic Rigidbody on the root makes sure the root receives OnTriggerEnter
-        // even if the collider sits on a child object.
         if (!TryGetComponent(out Rigidbody rb)) rb = gameObject.AddComponent<Rigidbody>();
         rb.isKinematic = true;
         rb.useGravity = false;
@@ -48,23 +45,21 @@ public class Coin : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"Coin touched by {other.name}");   // before any if: proves the trigger fired
+        Debug.Log($"Coin touched by {other.name}");
         if (collected) return;
         if (other.CompareTag("Player"))
         {
             collected = true;
             GameManager.Instance.OnCoinCollected(Type, value);
-            Destroy(gameObject);                      // gameObject, NOT "this"
+            Destroy(gameObject);
         }
     }
 
-    // Called by the Spawner right after Instantiate.
-    // 'material' (if given) replaces every material on the coin, so the colour is a pure
-    // red/blue instead of being multiplied with the gold texture.
+    // set coin type and color
     public void Setup(CoinType type, Material material, Color color)
     {
         Type = type;
-        if (type == CoinType.Normal) return;       // gold coins keep the prefab's own look
+        if (type == CoinType.Normal) return;
         foreach (Renderer r in GetComponentsInChildren<Renderer>())
         {
             if (material != null)
@@ -75,7 +70,7 @@ public class Coin : MonoBehaviour
             }
             else
             {
-                foreach (Material m in r.materials)    // per-renderer copies
+                foreach (Material m in r.materials)
                 {
                     if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
                     if (m.HasProperty("_Color")) m.SetColor("_Color", color);

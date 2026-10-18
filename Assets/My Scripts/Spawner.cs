@@ -1,39 +1,39 @@
+
 using UnityEngine;
 
-// Part 3 of the lecture: a prefab plus a clock. Extended with the Red coin and the Blue ring.
 public class Spawner : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] GameObject coinPrefab;
     [SerializeField] Transform player;
-    [Tooltip("Optional but recommended: drag the floor here and coins stay inside it.")]
+    [Tooltip("Add floor here")]
     [SerializeField] Transform floor;
 
     [Header("Normal (gold) coins")]
     [SerializeField] float interval = 1.5f;
     [SerializeField] int maxCoins = 5;
-    [Tooltip("Only used when no Floor is assigned: half-size of the square spawn area.")]
+    [Tooltip("Spawn area size if no floor")]
     [SerializeField] float area = 7f;
-    [Tooltip("Keep coins this far away from the floor edge / walls.")]
+    [Tooltip("Distance from walls")]
     [SerializeField] float edgeMargin = 1f;
     [SerializeField] float minDistanceFromPlayer = 2f;
-    [Tooltip("Raise/lower the coins relative to the ball's height.")]
+    [Tooltip("Coin height")]
     [SerializeField] float heightOffset = 0f;
 
     [Header("Special coins")]
     [SerializeField] Color redColor = new Color(1f, 0.1f, 0.1f);
     [SerializeField] Color blueColor = new Color(0.1f, 0.35f, 1f);
-    [Tooltip("Optional. Leave empty and the colour is applied from code.")]
+    [Tooltip("Optional material")]
     [SerializeField] Material redMaterial;
     [SerializeField] Material blueMaterial;
     [SerializeField] float redCoinScale = 1.5f;
     [SerializeField] float bonusRingRadius = 4f;
-    [Tooltip("Gap between blue coins. Make it bigger if your coin model is big.")]
+    [Tooltip("Gap between blue coins")]
     [SerializeField] float bonusCoinSpacing = 0.5f;
 
-    Transform specialParent;      // red + blue coins live here, so they don't count towards maxCoins
+    Transform specialParent;
     Material redRuntime, blueRuntime;
-    Vector2 arenaMin, arenaMax;   // x/z limits
+    Vector2 arenaMin, arenaMax;
 
     void Awake()
     {
@@ -43,15 +43,15 @@ public class Spawner : MonoBehaviour
 
     void Start() => InvokeRepeating(nameof(SpawnCoin), 1f, interval);
 
-    // ------------------------------------------------------------------ normal coins
+    // spawn normal coins
     void SpawnCoin()
     {
         if (transform.childCount >= maxCoins) return;
         if (!TryGetRandomPoint(out Vector3 pos)) return;
-        Create(pos, transform);   // gold coin = the prefab exactly as you made it (no tint)
+        Create(pos, transform);
     }
 
-    // ------------------------------------------------------------------ TASK 1: red coin
+    // spawn red coin
     public void SpawnRedCoin()
     {
         if (!TryGetRandomPoint(out Vector3 pos))
@@ -63,13 +63,12 @@ public class Spawner : MonoBehaviour
         coin.Setup(CoinType.Red, GetMaterial(ref redRuntime, redMaterial, redColor), redColor);
     }
 
-    // ------------------------------------------------------------------ TASK 2: blue ring
+    // spawn blue coins in circle
     public void SpawnBonusRing(int count)
     {
         Vector3 center = player != null ? player.position : transform.position;
         float radius = bonusRingRadius;
 
-        // Shrink the circle / slide its centre so the whole circle stays inside the arena.
         float maxR = Mathf.Min(arenaMax.x - arenaMin.x, arenaMax.y - arenaMin.y) * 0.5f;
         if (maxR > 0.5f)
         {
@@ -83,7 +82,7 @@ public class Spawner : MonoBehaviour
         float r = radius;
         float minRing = Mathf.Min(1.5f, radius);
 
-        // Outer ring first. If the ring is too crowded, continue with smaller rings inside it.
+        // make smaller rings if needed
         while (placed < count && r >= minRing)
         {
             int perRing = Mathf.Max(1, Mathf.FloorToInt(2f * Mathf.PI * r / bonusCoinSpacing));
@@ -98,7 +97,6 @@ public class Spawner : MonoBehaviour
             r -= bonusCoinSpacing;
         }
 
-        // Safety: if there still isn't room, scatter the rest inside the circle (always 'count' coins).
         while (placed < count)
         {
             Vector2 p = Random.insideUnitCircle * radius;
@@ -114,12 +112,10 @@ public class Spawner : MonoBehaviour
         coin.Setup(CoinType.Blue, GetMaterial(ref blueRuntime, blueMaterial, blueColor), blueColor);
     }
 
-    // ------------------------------------------------------------------ helpers
     float SpawnY => (player != null ? player.position.y : transform.position.y) + heightOffset;
 
     Coin Create(Vector3 pos, Transform parent)
     {
-        // use the prefab's own rotation so the coin faces the way you modelled it
         GameObject go = Instantiate(coinPrefab, pos, coinPrefab.transform.rotation, parent);
         Coin coin = go.GetComponent<Coin>();
         if (coin == null) coin = go.AddComponent<Coin>();
@@ -136,7 +132,7 @@ public class Spawner : MonoBehaviour
             if (player == null) return true;
             Vector3 d = pos - player.position;
             d.y = 0f;
-            if (d.magnitude >= minDistanceFromPlayer) return true;   // lecture: skip spots on the player
+            if (d.magnitude >= minDistanceFromPlayer) return true;
         }
         pos = Vector3.zero;
         return false;
@@ -163,7 +159,6 @@ public class Spawner : MonoBehaviour
         arenaMax = new Vector2(c.x + area, c.z + area);
     }
 
-    // Returns a shared material (one for all 50 blue coins). Null = fall back to tinting.
     Material GetMaterial(ref Material cache, Material assigned, Color color)
     {
         if (assigned != null) return assigned;
@@ -184,7 +179,7 @@ public class Spawner : MonoBehaviour
         return null;
     }
 
-    // Select the Spawner in the Hierarchy to see the spawn area as a yellow box.
+    // show spawn area in scene
     void OnDrawGizmosSelected()
     {
         ComputeArena();

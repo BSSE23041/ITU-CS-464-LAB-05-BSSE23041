@@ -1,11 +1,10 @@
+
 using UnityEngine;
 
-// Fades the win screen in and "pops" the card. Uses UNSCALED time, because the game
-// is frozen (Time.timeScale = 0) when the win panel is shown.
 [RequireComponent(typeof(CanvasGroup))]
 public class WinPanelAnimator : MonoBehaviour
 {
-    [SerializeField] RectTransform card;      // the box in the middle (drag "Card" here)
+    [SerializeField] RectTransform card;
     [SerializeField] float duration = 0.6f;
     [SerializeField] float startScale = 0.6f;
 
@@ -31,7 +30,7 @@ public class WinPanelAnimator : MonoBehaviour
             card.localScale = Vector3.one * Mathf.LerpUnclamped(startScale, 1f, EaseOutBack(t));
     }
 
-    // slight overshoot, then settles
+    // small pop effect
     static float EaseOutBack(float x)
     {
         const float c1 = 1.70158f;

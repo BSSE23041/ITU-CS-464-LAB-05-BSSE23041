@@ -1,9 +1,9 @@
+
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
 
-// Part 1 of the lecture: roll the ball by pushing it with AddForce every physics step.
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
@@ -11,9 +11,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] ForceMode mode = ForceMode.Force;
 
     [Header("Controls")]
-    [Tooltip("W/Up always means 'away from the camera' (works for any camera angle).")]
+    [Tooltip("Movement based on camera direction")]
     [SerializeField] bool cameraRelative = true;
-    [SerializeField] Transform cam;            // leave empty = uses Main Camera
+    [SerializeField] Transform cam;
 
     Rigidbody rb;
     Vector3 input;
@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour
         if (cam == null && Camera.main != null) cam = Camera.main.transform;
     }
 
-    // Read input in Update (every rendered frame)...
+    // get player movement
     void Update()
     {
         Vector2 raw = ReadInput();
@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
         {
             Vector3 fwd = cam.forward;
             fwd.y = 0f;
-            if (fwd.sqrMagnitude < 0.01f)      // camera looking straight down
+            if (fwd.sqrMagnitude < 0.01f)
             {
                 fwd = cam.up;
                 fwd.y = 0f;
@@ -44,14 +44,12 @@ public class PlayerController : MonoBehaviour
             move = fwd * raw.y + right * raw.x;
         }
 
-        // clamp so diagonals are not faster (Lecture 04)
         input = Vector3.ClampMagnitude(move, 1f);
     }
 
-    // ...and push in FixedUpdate (every physics step)
+    // move ball using force
     void FixedUpdate() => rb.AddForce(input * moveForce, mode);
 
-    // Works with the old Input Manager, the new Input System, or "Both".
     Vector2 ReadInput()
     {
 #if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER

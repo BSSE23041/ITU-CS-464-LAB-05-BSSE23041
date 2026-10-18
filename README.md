@@ -8,8 +8,6 @@
 **Game Engine:** Unity 6  
 **Language:** C#
 
----
-
 ## 🌟 About the Game
 
 This is a simple 3D coin collection game made in Unity. The player controls a tennis ball inside a small arena surrounded by walls.
@@ -22,7 +20,7 @@ To make the game more interesting, different types of coins, a bonus collection 
 
 I have recorded a short video showing how the game works, including coin collection, the bonus round, and the win screen.
 
-▶️ **[Watch Gameplay on YouTube](PASTE_YOUR_YOUTUBE_LINK_HERE)**
+▶️ **[Watch Gameplay on YouTube](https://youtu.be/eo4QiKOAv9Y)**
 
 ## 🕹️ How to Play
 
@@ -33,29 +31,6 @@ I have recorded a short video showing how the game works, including coin collect
 5. **Collect bonus coins:** Collect the blue coins while the bonus counter tracks your progress.
 6. **Win the game:** Reach a score of 10 and collect all 50 blue coins to complete the game.
 7. **Play again:** Click the Restart button on the win screen to start a new game.
-
-## ✨ Features Implemented
-
-### 🟡 Gold Coin Collection
-- Gold coins appear automatically inside the arena.
-- Each collected coin increases the player's score.
-- New coins continue spawning during gameplay.
-
-### 🔴 Special Red Coin
-- One red coin appears at a random score between 1 and 10.
-- The red coin adds a new challenge to the game.
-- Collecting it unlocks the bonus coin round.
-
-### 🔵 Bonus Blue Coins
-- 50 blue coins appear in a circular pattern.
-- A hidden bonus counter becomes visible when the bonus round starts.
-- The counter updates as the player collects blue coins, for example `BonusCoins: 25/50`.
-
-### 🏆 Win Screen
-- A win screen appears when the player completes all the required tasks.
-- It displays a **YOU WIN!** message.
-- A Restart button allows the player to play again.
-- The win screen includes a dark background, a styled card, and a simple animation.
 
 ## 📸 Game Screenshots
 

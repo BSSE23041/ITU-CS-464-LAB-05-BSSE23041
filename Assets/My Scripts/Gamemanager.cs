@@ -1,9 +1,8 @@
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Part 4 of the lecture: ONE owner for the score, the text, the win and the restart.
-// Extended with: a random Red coin (score 1-10), a ring of 50 Blue coins, and a hidden bonus text.
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -15,18 +14,18 @@ public class GameManager : MonoBehaviour
 
     [Header("Special coins")]
     [SerializeField] Spawner spawner;
-    [Tooltip("Starts hidden. Appears when the red coin is collected.")]
+    [Tooltip("Shows after collecting red coin")]
     [SerializeField] TMP_Text bonusText;
     [SerializeField] int bonusCoinCount = 50;
-    [Tooltip("Points the red coin adds to the normal score (0 = none).")]
+    [Tooltip("Points given by red coin")]
     [SerializeField] int redCoinPoints = 0;
-    [Tooltip("ON: you only win after score >= target AND red coin AND all blue coins are collected.")]
+    [Tooltip("Win after collecting all required coins")]
     [SerializeField] bool requireBonusToWin = true;
-    [Tooltip("0 = pick a random score from 1 to 10 each game. Type 2 (for example) to test quickly.")]
+    [Tooltip("0 means random score")]
     [SerializeField] int forceRedAtScore = 0;
 
     int score;
-    int redSpawnScore;        // the score at which the ONE red coin appears
+    int redSpawnScore;
     int bonusCollected;
     bool redSpawned, redCollected, won;
 
@@ -34,16 +33,15 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Time.timeScale = 1f;                                   // safety: never start frozen
-        redSpawnScore = forceRedAtScore > 0 ? forceRedAtScore : Random.Range(1, 11);   // 1..10 inclusive
+        Time.timeScale = 1f;
+        redSpawnScore = forceRedAtScore > 0 ? forceRedAtScore : Random.Range(1, 11);
         Debug.Log($"Red coin will appear when the score reaches {redSpawnScore}");
 
         if (winPanel != null) winPanel.SetActive(false);
-        if (bonusText != null) bonusText.gameObject.SetActive(false);   // hidden until needed
+        if (bonusText != null) bonusText.gameObject.SetActive(false);
         UpdateUI();
     }
 
-    // Every coin reports here (the coin never touches the score itself).
     public void OnCoinCollected(CoinType type, int value)
     {
         switch (type)
@@ -58,29 +56,29 @@ public class GameManager : MonoBehaviour
     {
         score += amount;
         UpdateUI();
-        TrySpawnRedCoin();      // TASK 1
+        TrySpawnRedCoin();
         CheckWin();
     }
 
-    // ---------------------------------------------------------------- TASK 1
+    // spawn red coin once
     void TrySpawnRedCoin()
     {
         if (redSpawned || score < redSpawnScore) return;
-        redSpawned = true;                       // the flag guarantees ONLY ONE red coin
+        redSpawned = true;
         spawner.SpawnRedCoin();
         Debug.Log("Red coin spawned!");
     }
 
-    // ---------------------------------------------------------------- TASK 2 + 3
+    // red coin starts bonus round
     void CollectRedCoin()
     {
         redCollected = true;
-        spawner.SpawnBonusRing(bonusCoinCount);  // 50 blue coins in a circle around the player
+        spawner.SpawnBonusRing(bonusCoinCount);
 
         if (bonusText != null)
         {
-            bonusText.gameObject.SetActive(true);   // the hidden text appears
-            UpdateBonusUI();                        // "BonusCoins: 0/50"
+            bonusText.gameObject.SetActive(true);
+            UpdateBonusUI();
         }
         if (redCoinPoints > 0) AddScore(redCoinPoints);
         else { UpdateUI(); }
@@ -94,7 +92,6 @@ public class GameManager : MonoBehaviour
         CheckWin();
     }
 
-    // ---------------------------------------------------------------- UI
     void UpdateUI()
     {
         if (scoreText == null) return;
@@ -109,7 +106,7 @@ public class GameManager : MonoBehaviour
         if (bonusText != null) bonusText.text = $"BonusCoins: {bonusCollected}/{bonusCoinCount}";
     }
 
-    // ---------------------------------------------------------------- win / restart
+    // check if game is completed
     void CheckWin()
     {
         if (won || score < targetScore) return;
@@ -126,7 +123,7 @@ public class GameManager : MonoBehaviour
 
     public void Restart()
     {
-        Time.timeScale = 1f;                                   // timeScale survives a scene load
+        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
